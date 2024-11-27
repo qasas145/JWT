@@ -23,7 +23,6 @@ public class TokenService : ITokenService
         claims.Append(new Claim(ClaimTypes.NameIdentifier, user.Id));
         claims.Append(new Claim(ClaimTypes.Name, user.Email));
 
-
         var tokenHandler = new JwtSecurityTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor() {
             Issuer = _options.Issuer,
@@ -32,7 +31,7 @@ public class TokenService : ITokenService
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key)), SecurityAlgorithms.HmacSha256),
             Subject = new ClaimsIdentity(
                 claims.ToArray()
-            )
+            ),
         };
         var securityToken = tokenHandler.CreateToken(tokenDescriptor);
         var accessToken = tokenHandler.WriteToken(securityToken);
