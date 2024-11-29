@@ -64,6 +64,7 @@ public class AuthService : IAuthService
             Username = model.UserName,
             Roles = await _userManager.GetRolesAsync(newUser),
             Token = accessToken,
+            IsAuthenticated = true
         };
     }
 }

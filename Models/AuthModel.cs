@@ -5,6 +5,5 @@ public class AuthModel {
     public IList<String> Roles{get;set;}
     public string Token{get;set;}
     public bool IsAuthenticated{get;set;}
-    public DateTime ExpiresOn{get;set;}
 
 }

@@ -18,10 +18,16 @@ public class TokenService : ITokenService
     public async Task<string> GenerateToken(ApplicationUser user)
     {
         // getting roles
+        // let's generate token with other method , 
+        var userClaims = await _userManager.GetClaimsAsync(user);
+
         var roles = await _userManager.GetRolesAsync(user);
-        var claims = roles.Select(r=>new Claim(ClaimTypes.Role, r));
-        claims.Append(new Claim(ClaimTypes.NameIdentifier, user.Id));
-        claims.Append(new Claim(ClaimTypes.Name, user.Email));
+        var roleClaims = new List<Claim>();
+        foreach (var role in roles)
+            roleClaims.Add(new Claim("roles", role));
+        var claims = new Claim[]{
+            new Claim(JwtRegisteredClaimNames.Name, user.UserName),
+        }.Union(userClaims).Union(roleClaims);
 
         var tokenHandler = new JwtSecurityTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor() {
