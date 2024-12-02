@@ -1,6 +1,7 @@
 
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -15,6 +16,14 @@ public class TokenService : ITokenService
         _options = options.Value;
         _userManager = userManager;
     }
+
+    public string GenerateRefreshToken()
+    {
+        var randomNumber = RandomNumberGenerator.GetBytes(32);
+        return Convert.ToBase64String(randomNumber);
+
+    }
+
     public async Task<string> GenerateToken(ApplicationUser user)
     {
         // getting roles
@@ -33,7 +42,7 @@ public class TokenService : ITokenService
         var tokenDescriptor = new SecurityTokenDescriptor() {
             Issuer = _options.Issuer,
             Audience = _options.Audience,
-            Expires = DateTime.Now.AddDays(_options.ExpireinDays),
+            Expires = DateTime.Now.AddMinutes(_options.ExpireinMinutes),
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key)), SecurityAlgorithms.HmacSha256),
             Subject = new ClaimsIdentity(
                 claims.ToArray()

@@ -19,6 +19,7 @@ public class SigningController :ControllerBase{
         var result = await _service.Register(model);
         if (!result.IsAuthenticated)    
             return BadRequest(result.Message);
+        AddRefreshTokenToCookies(result.RefreshToken, result.RefreshTokenExpiresOn);
         return Ok(result);
     }
     
@@ -28,6 +29,7 @@ public class SigningController :ControllerBase{
         if (result == null) {
             return Unauthorized();
         }
+        AddRefreshTokenToCookies(result.RefreshToken, result.RefreshTokenExpiresOn);
         return Ok(result);
     }
     [HttpGet("test")]
@@ -36,6 +38,13 @@ public class SigningController :ControllerBase{
         var claims = Request.HttpContext.User.Claims;
         var name = Request.HttpContext.User.Claims.FirstOrDefault(c=>c.Type == JwtRegisteredClaimNames.Name);
         return Ok("Hello User, you are authorized");
+    }
+    public void AddRefreshTokenToCookies(string refreshToken, DateTime expiresOn) {
+        var cookieOptions = new CookieOptions() {
+            Expires = expiresOn,
+            HttpOnly = true
+        };
+        Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
     }
 
 }

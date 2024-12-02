@@ -7,4 +7,5 @@ public class ApplicationUser :IdentityUser{
     public string FirstName{get;set;}
     [Required, MaxLength(30)]
     public string LastName{get;set;}
+    public List<RefreshToken>? RefreshTokens{get;set;}
 }
