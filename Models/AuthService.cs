@@ -20,6 +20,15 @@ public class AuthService : IAuthService
         _tokenService = tokenService;
     }
 
+    public async Task<AuthModel> Logout(string userName) {
+        var user = await _userManager.FindByNameAsync(userName);
+        var refreshToken = user.RefreshTokens.FirstOrDefault(r=>r.IsActive == true);
+        if (refreshToken is null) 
+            return new AuthModel(){Message = "There's not active refresh token"};
+        refreshToken.RevokedOn = DateTime.UtcNow;
+        await _userManager.UpdateAsync(user);
+        return new AuthModel() {Message = "The user has been logged out on sucess"};
+    }
     public async Task<AuthModel> Login(LoginModel model)
     {
        var user =  await _userManager.FindByNameAsync(model.UserName);

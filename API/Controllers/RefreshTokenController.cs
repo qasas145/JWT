@@ -29,6 +29,21 @@ public class RefreshTokenController : ControllerBase {
         AddRefreshTokenToCookies(result.RefreshToken, result.RefreshTokenExpiresOn);
         return Ok(result);
     }
+    [HttpPost("revoke")]
+    public async Task<IActionResult> RevokeRefreshToken() {
+        var refreshToken = Request.Cookies["refreshToken"];
+        if (refreshToken == null)
+            return BadRequest("There's no token");
+        var userWithTokenExists = _userManager.Users.SingleOrDefault(u=>u.RefreshTokens.Any(r=>r.Token == refreshToken));
+        if (userWithTokenExists is null)
+            return BadRequest("The token isn't exists with any user");
+        var tokenNotExpired = userWithTokenExists.RefreshTokens.FirstOrDefault(r=>r.Token == refreshToken & r.IsActive == true);
+        if (tokenNotExpired is null) 
+            return BadRequest("the token is revoked already");
+        tokenNotExpired.RevokedOn = DateTime.UtcNow;
+        await _userManager.UpdateAsync(userWithTokenExists);
+        return Ok("The token has been revoked");
+    }
      public void AddRefreshTokenToCookies(string refreshToken, DateTime expiresOn) {
         var cookieOptions = new CookieOptions() {
             Expires = expiresOn,

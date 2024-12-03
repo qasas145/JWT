@@ -2,7 +2,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Models;
+using JwtRegisteredClaimNames = System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames;
 
 [ApiController]
 [Route("/api/[controller]")]
@@ -32,7 +34,17 @@ public class SigningController :ControllerBase{
         AddRefreshTokenToCookies(result.RefreshToken, result.RefreshTokenExpiresOn);
         return Ok(result);
     }
-    [HttpGet("test")]
+    [HttpPost("logout")]
+    [Authorize]
+    public async Task<IActionResult> Logout() {
+        var userClaims = Request.HttpContext.User.Claims;
+        var userNameClaim = userClaims.FirstOrDefault(c=>c.Type == JwtRegisteredClaimNames.Name);
+        var result = await _service.Logout(userNameClaim.Value);
+
+        return Ok(result.Message);
+    }
+
+    [HttpPost("test")]
     [Authorize(Roles ="User")]
     public async Task<IActionResult> Test() {
         var claims = Request.HttpContext.User.Claims;
